@@ -1036,6 +1036,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 786270578}
+        m_TargetAssemblyTypeName: Ad, Assembly-CSharp
+        m_MethodName: ShowRewardVideo
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &292992359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1803,7 +1815,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _revivalButton: {fileID: 292992358}
-  _adTimer: 5
+  _adTimer: 120
   _attemptCount: 3
 --- !u!1 &825737578
 GameObject:
@@ -2232,7 +2244,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1657344654
 RectTransform:
   m_ObjectHideFlags: 0

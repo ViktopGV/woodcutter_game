@@ -4,26 +4,6 @@ mergeInto(LibraryManager.library, {
     return platformCheck();
   },
 
-  PlatformCheck: function () {
-    var Str = "";
-    var bufferSize;
-    var buffer;
-    if(container.className == 'unity-mobile')
-    {
-        Str = "mobile";
-        bufferSize = lengthBytesUTF8(Str) + 1;
-        buffer = _malloc(bufferSize);
-    }
-    else    
-    {
-        Str = "desktop";
-        bufferSize = lengthBytesUTF8(Str) + 1;
-        buffer = _malloc(bufferSize);
-    }
-    stringToUTF8(Str, buffer, bufferSize);
-    return buffer;
-  },
-
   ShowFullScreenAds: function()
   {
     showFullScreenAds();
@@ -32,6 +12,18 @@ mergeInto(LibraryManager.library, {
   ShowRewardAds: function()
   {
     showRewardAds();
+  },
+
+  SetData: function(key, value) {
+    setData(Pointer_stringify(key), value);
+  },
+
+  GetData: function(key) {
+    return getData(Pointer_stringify(key));
+  },
+  
+  AppleDeviceCheck: function(){
+    return isAppleDevice();
   }
   
 });

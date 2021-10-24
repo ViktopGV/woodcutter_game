@@ -16,11 +16,16 @@ public class AdRevival : MonoBehaviour
 
     public static int GetScore() => _playerScore;
     public static void SetScore(int score) => _playerScore = score;
-    //public static 
+
+    private void Awake()
+    {
+        _coroutines ??= new List<Coroutine>();
+    }
 
     private void Start()
     {
-        if (_remainingTime == 0)
+
+        if (_remainingTime <= 0)
             _remainingTime = _adTimer;
 
         if(_coroutines.Count > 0)
@@ -33,7 +38,7 @@ public class AdRevival : MonoBehaviour
     }
 
     public void RewardAdCheck()
-    {        
+    {
         if (_coroutines.Count >= _attemptCount)
             _revivalButton.gameObject.SetActive(false);
         else
@@ -44,7 +49,7 @@ public class AdRevival : MonoBehaviour
     {
         if(_coroutines.Count != 0)
         {
-            _remainingTime -= Time.unscaledTime;
+            _remainingTime -= Time.unscaledDeltaTime;
         }
     }
 
@@ -57,5 +62,6 @@ public class AdRevival : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(_remainingTime);
         _coroutines.RemoveAt(0);
+        RewardAdCheck();
     }
 }

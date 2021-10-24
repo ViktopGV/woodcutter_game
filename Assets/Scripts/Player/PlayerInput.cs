@@ -21,7 +21,6 @@ public class PlayerInput : MonoBehaviour
 
     private void Start()
     {
-        _platform = Platform.Desktop;
         _halfScreenWidth = Screen.width / 2;
 #if !UNITY_EDITOR
         if (YandexPlatformCheck())
