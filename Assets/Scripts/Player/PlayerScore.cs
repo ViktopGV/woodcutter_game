@@ -5,15 +5,7 @@ using UnityEngine;
 
 public class PlayerScore : MonoBehaviour
 {
-    [DllImport("__Internal")]
-    private static extern bool AppleDeviceCheck();
-
-    [DllImport("__Internal")]
-    private static extern void SetData(string key, int value);
-
-    [DllImport("__Internal")]
-    private static extern int GetData(string key);
-
+    public LeaderboardManager LeaderboardManager;
 
     public event Action<int> ScoreIncreased;
     public int Score => _score;
@@ -21,39 +13,60 @@ public class PlayerScore : MonoBehaviour
 
     private int _score;
     private int _bestScore;
-    private bool isAppleDevice;
 
-    private void Awake()
+    struct BS { public int bestScore; }
+    private BS _bs;
+
+    private void OnEnable()
     {
-        isAppleDevice = AppleDeviceCheck();
+        YaPlayer.PlayerGetData += YaPlayer_PlayerGetData; 
+    }
+
+    private void OnDisable()
+    {
+        YaPlayer.PlayerGetData -= YaPlayer_PlayerGetData;
+    }
+
+    private void YaPlayer_PlayerGetData(string obj)
+    {
+        _bs = JsonUtility.FromJson<BS>(obj);
+        _bestScore = _bs.bestScore;        
+    }
+
+    public void LoadBestScore()
+    {
+        if(YaPlayer.IsPlayerAuthorized)
+        {
+            if (int.TryParse(YaSDK.GetSafeData("bestScore"), out _bestScore) == true)
+            {
+                _bs.bestScore = _bestScore;
+                YaPlayer.SetData(JsonUtility.ToJson(_bs));
+                YaSDK.RemoveItem("bestScore");
+            }
+            else
+            {
+                YaPlayer.GetData();
+            }
+        }
+        else
+        {
+            if (int.TryParse(YaSDK.GetSafeData("bestScore"), out _bestScore) == false)
+                _bestScore = 0;
+        }
+
+        
     }
 
     private void Start()
     {
-        _score = AdRevival.GetScore();
-        if (isAppleDevice)
-        {
-            //не работает, это бутофория, надо просто вызвать GetData
-            _bestScore = GetData("score");
-        }
-        else
-        {
-            _bestScore = LoadPlayerData.LoadBestScore();
-        }
-    }
-
-    //будет вызван из js для загрузки bestScore из storage яндекса 
-    private void LoadBestScore(int score)
-    {
-        _bestScore = score;
+        _bs = new BS();
+        LoadBestScore();
     }
 
     public void IncreaseScore()
     {
         _score++;
         ScoreIncreased?.Invoke(_score);
-        if (IsBestScoreCheck())
-            SaveBestScore();
     }
 
     public bool IsBestScoreCheck()
@@ -64,11 +77,30 @@ public class PlayerScore : MonoBehaviour
             return false;
     }
 
+    public void SetToZero()
+    {
+        _bs.bestScore = 0;
+        YaPlayer.SetData(JsonUtility.ToJson(_bs));
+    }
+
     public void SaveBestScore()
     {
-        SavePlayerData.SaveBestScore(_score);
-        _bestScore = _score;
-        if (isAppleDevice)
-            SetData("score", _bestScore);
+        if (IsBestScoreCheck())
+        {
+            _bs.bestScore = _bestScore = _score;
+            if (YaPlayer.IsPlayerAuthorized)
+            {
+                YaPlayer.SetData(JsonUtility.ToJson(_bs));
+                YaLeaderboard.SetLeaderboardScore("BestScore", _bs.bestScore);
+            }
+            else
+            {
+                YaSDK.SetSafeData("bestScore", _bestScore.ToString());
+            }
+
+        }
+        else
+            LeaderboardManager.LoadLeaderboard();
+        
     }
 }

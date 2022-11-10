@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,9 +9,6 @@ public enum Platform
 
 public class PlayerInput : MonoBehaviour
 {
-    [DllImport("__Internal")]
-    private static extern bool YandexPlatformCheck();
-
     public UnityEvent LeftClicked;
     public UnityEvent RightClicked;
 
@@ -23,12 +19,12 @@ public class PlayerInput : MonoBehaviour
     {
         _halfScreenWidth = Screen.width / 2;
 #if !UNITY_EDITOR
-        if (YandexPlatformCheck())
-            _platform = Platform.Desktop;
+        if (YaSDK.GetDevice() == "desktop")
+            _platform = Platform.Desktop;            
         else
             _platform = Platform.Other;
-#else 
-        _platform = Platform.Desktop;
+#else         
+        _platform = Platform.Desktop;        
 #endif
     }
 

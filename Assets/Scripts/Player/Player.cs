@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -8,7 +9,6 @@ public class Player : MonoBehaviour
     public UnityEvent PlayerCutBranch;
     public UnityEvent PlayerRevivaled;
 
-    [SerializeField] private Ad _ad;
     [SerializeField] private TextView _scoreText;
     [SerializeField] private TextView _bestScoreText;
 
@@ -37,27 +37,31 @@ public class Player : MonoBehaviour
     public void PlayerRevival()
     {
         PlayerRevivaled?.Invoke();
-        AdRevival.SetScore(_playerScore.Score);
-        //_killerBranch.transform.GetComponentInParent<BranchController>().RespawnBranch(_killerBranch);//spike
+        _killerBranch.transform.GetComponentInParent<BranchController>().RespawnBranch(_killerBranch);//spike
     }
 
     public void SetGameOverText()
     {
         _scoreText.SetText("Набрано " + _playerScore.Score);
+        StartCoroutine(Test());
+    }
+
+    IEnumerator Test()
+    {
+        yield return new WaitUntil(() => _playerScore.BestScore != 0);
         _bestScoreText.SetText("Лучший счет: " + _playerScore.BestScore);
+
     }
 
 
     private void OnEnable()
     {
-        _ad.Rewarded += PlayerRevival;
         PlayerCutBranch.AddListener(_playerScore.IncreaseScore);
         _playerScore.ScoreIncreased += _scoreText.SetText;
     }
 
     private void OnDisable()
     {
-        _ad.Rewarded -= PlayerRevival;
         PlayerCutBranch.RemoveListener(_playerScore.IncreaseScore);
         _playerScore.ScoreIncreased -= _scoreText.SetText;
     }
@@ -76,6 +80,6 @@ public class Player : MonoBehaviour
     private void Start()
     {
         _sideHandler.SetRandomSide();
-        _scoreText.SetText(AdRevival.GetScore());
+        _scoreText.SetText(_playerScore.Score);
     }
 }

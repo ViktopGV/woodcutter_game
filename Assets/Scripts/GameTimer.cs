@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -6,6 +7,7 @@ using UnityEngine.UI;
 public class GameTimer : MonoBehaviour
 {
     public UnityEvent TimeExpired;
+    public static event Action TimerStarted;
 
     [SerializeField] private float _maxGameSeconds = 7;
     [SerializeField] private float _gameSeconds = 4;
@@ -28,7 +30,10 @@ public class GameTimer : MonoBehaviour
     public void StartTimer()
     {
         if (!_isCoroutineStarted && isActiveAndEnabled)
+        {
             StartCoroutine(DecreaseTime());
+            TimerStarted?.Invoke();
+        }
 
     }
 
