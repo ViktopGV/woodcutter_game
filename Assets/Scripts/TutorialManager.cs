@@ -1,34 +1,67 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class TutorialManager : MonoBehaviour
 {
-    [SerializeField] private GameTimer _timer;
+    [SerializeField] private PlayerInput _playerInput;
+
     [SerializeField] private GameObject _mobilePanel;
     [SerializeField] private GameObject _pcPanel;
     [SerializeField] private GameObject _timePanel;
 
+    private Platform _platform;
     private bool _timeTutorialShowed = false;
+    private bool _allTutrialsPassed = false;
 
     private void Start()
     {
+        if (YaSDK.GetDevice() == "desktop")
+            _platform = Platform.Desktop;
+        else
+            _platform = Platform.Other;
+
         if (YaSDK.GetSafeData("tutorial_pass") == "Null")
             ShowTutorial();
-        else _timeTutorialShowed=true;
+        else
+        {
+            _timeTutorialShowed = true;
+            _allTutrialsPassed = true;
+            _playerInput.enabled = true;
+        }
     }
 
-    private void OnEnable()
+    private void Update()
     {
-        GameTimer.TimerStarted += GameTimer_TimerStarted;        
-    }
+        if (_allTutrialsPassed == false)
+        {
+            if (_platform == Platform.Desktop)
+            {
+                if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    if (_timeTutorialShowed)
+                    {
+                        _allTutrialsPassed = true;
+                        _playerInput.enabled = true;
+                        HidePanels();
+                    }
+                    HidePanels();                    
+                }
+            }
+            else
+            {
+                if (Input.touchCount > 0)
+                {
+                    if (_timeTutorialShowed)
+                    {
+                        _allTutrialsPassed = true;
+                        _playerInput.enabled = true;
+                        HidePanels();
 
-    private void GameTimer_TimerStarted()
-    {
-        HidePanels();
-    }
-
-    private void OnDisable()
-    {
-        GameTimer.TimerStarted -= GameTimer_TimerStarted;
+                    }
+                    HidePanels();                    
+                }
+            }
+        }
     }
 
     public void ShowTimeTutorial()
@@ -54,7 +87,6 @@ public class TutorialManager : MonoBehaviour
         if (_timeTutorialShowed == false)
         {
             ShowTimeTutorial();
-            _timer.StopTimer();
             _timeTutorialShowed = true;
         }
     }

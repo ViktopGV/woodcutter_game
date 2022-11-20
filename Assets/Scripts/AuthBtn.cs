@@ -11,11 +11,9 @@ public class AuthBtn : MonoBehaviour
 
     public void SuccsessAuth()
     {
-        if (YaPlayer.IsPlayerAuthorized)
-        {
-            _authText.gameObject.SetActive(false);
-            _succsessAuthText.gameObject.SetActive(true);
-            _succsessImage.gameObject.SetActive(true);
-        }
+        gameObject.SetActive(true);
+        _authText.gameObject.SetActive(false);
+        _succsessAuthText.gameObject.SetActive(true);
+        _succsessImage.gameObject.SetActive(true);
     }
 }

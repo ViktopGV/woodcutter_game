@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class YaPlayer : MonoBehaviour
 {
+    public static event Action<bool> PlayerInited;
     public static event Action PlayerAuthorized;
     public static event Action PlayerRefusedAuthorize;
     public static event Action<string> PlayerIncrementedStats;
     public static event Action<string> PlayerGetIncrementedStats;
     public static event Action<string> PlayerGetData;
-    public static bool IsPlayerAuthorized => _isPlayerAuthorized;
+
+
     [DllImport("__Internal")]
     public static extern void OpenAuthDialog();
     [DllImport("__Internal")]
@@ -21,21 +23,21 @@ public class YaPlayer : MonoBehaviour
     [DllImport("__Internal")]
     public static extern bool IsPlayerAuth();
 
-    private static bool _isPlayerAuthorized;
+
     [DllImport("__Internal")]
     private static extern void InitializationPlayer();
+
     void Start()
     {
-        _isPlayerAuthorized = false;
         InitializationPlayer();
     }
 
-    private void PlayerSuccsessfullyInitedCallback(int isAuth) { 
-        _isPlayerAuthorized = !Convert.ToBoolean(isAuth);
+    private void PlayerSuccsessfullyInitedCallback(int isAuth) 
+    {
+        PlayerInited?.Invoke(!Convert.ToBoolean(isAuth));
     }
     private void PlayerSuccsessfullyAuthCallback()
     {
-        _isPlayerAuthorized = true;
         PlayerAuthorized?.Invoke();
     }
     private void PlayerRefuseAuthCallback()

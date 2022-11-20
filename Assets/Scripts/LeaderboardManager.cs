@@ -4,7 +4,6 @@ using UnityEngine.SocialPlatforms.Impl;
 
 public class LeaderboardManager : MonoBehaviour
 {
-    [SerializeField] private PlayerScore _playerScore;
     public LeaderboardItem _prefab;
     private LeaderboardItem[] _items;
     private int _itemsCount = 5;
@@ -21,7 +20,7 @@ public class LeaderboardManager : MonoBehaviour
 
     public void LoadLeaderboard()
     {
-        if(YaPlayer.IsPlayerAuthorized == true)
+        if(YaPlayer.IsPlayerAuth() == true)
             YaLeaderboard.GetLeaderboardEntries("BestScore", true, 3, 1);
         else
             YaLeaderboard.GetLeaderboardEntries("BestScore", false, 1, 5);
@@ -33,6 +32,7 @@ public class LeaderboardManager : MonoBehaviour
     {
         YaLeaderboard.GotLeaderboardEntries += YaLeaderboard_GotLeaderboardEntries;
         YaLeaderboard.LeaderboardScoreSetted += YaLeaderboard_LeaderboardScoreSetted;
+        LoadLeaderboard();
     }
 
 
@@ -41,7 +41,6 @@ public class LeaderboardManager : MonoBehaviour
     private void YaLeaderboard_LeaderboardScoreSetted()
     {
         LoadLeaderboard();
-        Debug.Log("Установили лидерборд");
     }
 
     private void OnDisable()
@@ -53,7 +52,6 @@ public class LeaderboardManager : MonoBehaviour
 
     private void YaLeaderboard_GotLeaderboardEntries(Leaderboard.LeaderboardEntries obj)
     {
-        Debug.Log("Получили лидерборд");
         int i = 0;
         if (obj.entries.Count < _itemsCount)
         {
@@ -65,10 +63,13 @@ public class LeaderboardManager : MonoBehaviour
         }
         else
         {
-            for(int j = obj.entries.Count - _itemsCount; j < obj.entries.Count; ++j)
+            int count = obj.entries.Count > _itemsCount ? obj.entries.Count - _itemsCount - 1 : 0;
+            for (int j = count; j < obj.entries.Count; ++j)
             {
                 _items[i].SetLeaderboardItem(obj.entries[j].rank.ToString(), obj.entries[j].player.avatarSrc, obj.entries[j].player.publicName == string.Empty ? "Anonim" + obj.entries[j].player.uniqueID[0..5] : obj.entries[j].player.publicName, obj.entries[j].score.ToString());
                 ++i;
+                if (i > _itemsCount - 1)
+                    break;
             }
         }
 

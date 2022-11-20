@@ -7,12 +7,15 @@ using UnityEngine;
 public class YaLeaderboard : MonoBehaviour
 {
     public static event Action<LeaderboardEntries> GotLeaderboardEntries;
+    public static event Action<Entry> GotLeaderboardPlayerEntry;
     public static event Action LeaderboardScoreSetted;
+    public static event Action LeaderboardPlayerNotPresent;
     [DllImport("__Internal")]
     public static extern void GetLeaderboardEntries(string leaderboard, bool includeUser = false, int quantityAround = 5, int quantityTop = 5, string avatarSize = "small");
-
     [DllImport("__Internal")]
     public static extern void SetLeaderboardScore(string leaderboard, float score);
+    [DllImport("__Internal")]
+    public static extern void GetLeaderboardPlayerEntry(string leaderboard);
     [DllImport("__Internal")]
     private static extern void ItitializeLeaderboard();
 
@@ -26,6 +29,14 @@ public class YaLeaderboard : MonoBehaviour
         LeaderboardEntries lb = JsonUtility.FromJson<LeaderboardEntries>(json);
         GotLeaderboardEntries?.Invoke(lb);
     }
+
+    private void GetLeaderboardPlayerEntryCallback(string json)
+    {
+        Entry entry = JsonUtility.FromJson<Entry>(json);
+        GotLeaderboardPlayerEntry?.Invoke(entry);
+    }
+
+    private void LeaderboardPlayerNotPresentCallback() => LeaderboardPlayerNotPresent?.Invoke();
 
     private void SetLeaderboardCallback()
     {

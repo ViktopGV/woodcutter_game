@@ -21,7 +21,6 @@ public class Player : MonoBehaviour
         if (_sideHandler.Side == branch.BranchSide)
         {
             PlayerDied();
-            SetGameOverText();
             _killerBranch = branch;
             return true;
         }
@@ -43,16 +42,8 @@ public class Player : MonoBehaviour
     public void SetGameOverText()
     {
         _scoreText.SetText("Набрано " + _playerScore.Score);
-        StartCoroutine(Test());
-    }
-
-    IEnumerator Test()
-    {
-        yield return new WaitUntil(() => _playerScore.BestScore != 0);
         _bestScoreText.SetText("Лучший счет: " + _playerScore.BestScore);
-
     }
-
 
     private void OnEnable()
     {

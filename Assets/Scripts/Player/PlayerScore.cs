@@ -15,33 +15,62 @@ public class PlayerScore : MonoBehaviour
     private int _bestScore;
 
     struct BS { public int bestScore; }
-    private BS _bs;
 
     private void OnEnable()
     {
-        YaPlayer.PlayerGetData += YaPlayer_PlayerGetData; 
+        YaPlayer.PlayerGetData += YaPlayer_PlayerGetData;
+        YaPlayer.PlayerInited += YaPlayer_PlayerInited;
+        YaPlayer.PlayerAuthorized += YaPlayer_PlayerAuthorized;
+        YaLeaderboard.GotLeaderboardPlayerEntry += YaLeaderboard_GotLeaderboardPlayerEntry;
+    }
+
+    private void YaPlayer_PlayerAuthorized()
+    {
+        YaLeaderboard.GetLeaderboardPlayerEntry("BestScore");
+    }
+
+    private void YaLeaderboard_GotLeaderboardPlayerEntry(Leaderboard.Entry obj)
+    {
+        if (_bestScore > obj.score)
+            YaLeaderboard.SetLeaderboardScore("BestScore", _bestScore);
+    }
+
+    private void YaPlayer_PlayerInited(bool obj)
+    {
+        LoadBestScore();
     }
 
     private void OnDisable()
     {
+        YaPlayer.PlayerInited -= YaPlayer_PlayerInited;
         YaPlayer.PlayerGetData -= YaPlayer_PlayerGetData;
+        YaPlayer.PlayerAuthorized -= YaPlayer_PlayerAuthorized;
+
+        YaLeaderboard.GotLeaderboardPlayerEntry -= YaLeaderboard_GotLeaderboardPlayerEntry;
+
     }
 
     private void YaPlayer_PlayerGetData(string obj)
     {
-        _bs = JsonUtility.FromJson<BS>(obj);
-        _bestScore = _bs.bestScore;        
+        BS bs = JsonUtility.FromJson<BS>(obj);
+        _bestScore = bs.bestScore;        
     }
 
     public void LoadBestScore()
     {
-        if(YaPlayer.IsPlayerAuthorized)
+        
+        string score = YaSDK.GetSafeData("bestScore");
+        if (YaPlayer.IsPlayerAuth() == true)
         {
-            if (int.TryParse(YaSDK.GetSafeData("bestScore"), out _bestScore) == true)
+            if (score != "Null")
             {
-                _bs.bestScore = _bestScore;
-                YaPlayer.SetData(JsonUtility.ToJson(_bs));
+                BS bs = new BS();
+                bs.bestScore = int.Parse(score);
+                _bestScore = bs.bestScore;
+                YaPlayer.SetData(JsonUtility.ToJson(bs));
+                SaveBestScore();
                 YaSDK.RemoveItem("bestScore");
+
             }
             else
             {
@@ -50,18 +79,18 @@ public class PlayerScore : MonoBehaviour
         }
         else
         {
-            if (int.TryParse(YaSDK.GetSafeData("bestScore"), out _bestScore) == false)
+            if (score != "Null")
+            {
+                _bestScore = int.Parse(score);
+            }
+            else
+            {
                 _bestScore = 0;
+            }
         }
 
-        
     }
 
-    private void Start()
-    {
-        _bs = new BS();
-        LoadBestScore();
-    }
 
     public void IncreaseScore()
     {
@@ -77,30 +106,23 @@ public class PlayerScore : MonoBehaviour
             return false;
     }
 
-    public void SetToZero()
-    {
-        _bs.bestScore = 0;
-        YaPlayer.SetData(JsonUtility.ToJson(_bs));
-    }
-
     public void SaveBestScore()
     {
-        if (IsBestScoreCheck())
+        if (IsBestScoreCheck() == true)
         {
-            _bs.bestScore = _bestScore = _score;
-            if (YaPlayer.IsPlayerAuthorized)
+            _bestScore = _score;
+
+            if(YaPlayer.IsPlayerAuth() == true)
             {
-                YaPlayer.SetData(JsonUtility.ToJson(_bs));
-                YaLeaderboard.SetLeaderboardScore("BestScore", _bs.bestScore);
+                BS bs = new BS();
+                bs.bestScore = _bestScore;
+                YaPlayer.SetData(JsonUtility.ToJson(bs));
+                YaLeaderboard.SetLeaderboardScore("BestScore", _bestScore);
             }
             else
             {
                 YaSDK.SetSafeData("bestScore", _bestScore.ToString());
             }
-
         }
-        else
-            LeaderboardManager.LoadLeaderboard();
-        
     }
 }

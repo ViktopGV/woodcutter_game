@@ -55,6 +55,11 @@ mergeInto(LibraryManager.library, {
         getLeaderboardEntries(leaderboard, includeUser, quantityAround, quantityTop, avatarSize);
     },
 
+    GetLeaderboardPlayerEntry: function(leaderboard) {
+        leaderboard = UTF8ToString(leaderboard);
+        getLeaderboardPlayerEntry(leaderboard);
+    },
+
     InitializationPlayer: function(){
         initializationPlayer();
     },
@@ -87,7 +92,7 @@ mergeInto(LibraryManager.library, {
     },
 
     IsPlayerAuth: function() {
-        return player.getMode() === 'lite';
+        return !(player.getMode() === 'lite');
     }
 
     

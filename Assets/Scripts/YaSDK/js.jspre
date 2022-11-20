@@ -9,7 +9,6 @@ YaGames
     window.ysdk = ysdk;
     ysdk.getStorage().then(safeStorage => Object.defineProperty(window, 'localStorage', { get: () => safeStorage }))
     showFullscreenAdv();
-    console.log("Yandex Inited")
     
 });
 }
@@ -84,6 +83,7 @@ function getSafeData(key) {
 }
 
 function initializationLeaderboard() {
+    if(typeof lb !== 'undefined') return;
     ysdk.getLeaderboards().then(_lb => window.lb = _lb);
 }
 
@@ -101,20 +101,31 @@ function getLeaderboardEntries(leaderboard, includeUser, quantityAround, quantit
             res.entries[i].player.avatarSrcSet = res.entries[i].player.getAvatarSrcSet(avatarSize);
         }
         Module.SendMessage('YaGamesSDK', 'GetLeaderboardEntriesCallback', JSON.stringify(res));  
-      });    
-    
+      });       
+}
+
+function getLeaderboardPlayerEntry(leaderboard) {
+    ysdk.getLeaderboards()
+    .then(lb => lb.getLeaderboardPlayerEntry(leaderboard))
+    .then(res => Module.SendMessage('YaGamesSDK', 'GetLeaderboardPlayerEntryCallback', JSON.stringify(res)))
+    .catch(err => {
+        if (err.code === 'LEADERBOARD_PLAYER_NOT_PRESENT') {
+            Module.SendMessage('YaGamesSDK', 'LeaderboardPlayerNotPresentCallback');
+        }
+    });
 }
 
 function initializationPlayer() {
-    ysdk.getPlayer({scopes : true}).then(_player => { 
-        window.player = _player;
+    ysdk.getPlayer({scopes : true}).then(_player => {
+    window.player = _player;
         Module.SendMessage('YaGamesSDK', 'PlayerSuccsessfullyInitedCallback', Number(_player.getMode() === 'lite'));
     });
 }
 
 function openAuthDialog() {
     ysdk.auth.openAuthDialog().then(() => {
-        Module.SendMessage('YaGamesSDK', 'PlayerSuccsessfullyAuthCallback');        
+        Module.SendMessage('YaGamesSDK', 'PlayerSuccsessfullyAuthCallback');
+        initializationPlayer();
     }).catch(() => {
         Module.SendMessage('YaGamesSDK', 'PlayerRefuseAuthCallback');
     });
